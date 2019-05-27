@@ -4,9 +4,14 @@ const wss = new WebSocket.Server({
     port: 8080,
 });
 
+let userCounts = 0;
+const userInitCredit = 10000;
+const userNameList = [];
+const userInfoList = [];
+const userInfoMap = new Map();
+
 /** 接收 Client 連線 */
 wss.on('connection', (ws) => {
-
     /** 接收 Client 關閉連線訊息 */
     ws.on('close', () => {
     });
@@ -21,6 +26,36 @@ wss.on('connection', (ws) => {
         const pkg = JSON.parse(data);
 
         switch (pkg.type) {
+            case 'Login':
+                {
+                    const userName = pkg.message.userName;
+                    if (userNameList.includes(userName)) {
+                        // TODO
+                        const userInfo = userInfoMap.get(userName);
+                        ws.send(JSON.stringify({
+                            type: `${pkg.type}`,
+                            message: userInfo,
+                        }));
+                        console.log(`userInfo: ${userInfo}`);
+                    }
+                    else {
+                        ++userCounts;
+                        const userInfo = {
+                            userID: userCounts,
+                            userName,
+                            credit: userInitCredit,
+                        };
+                        userNameList.push(userName);
+                        userInfoList.push(userInfo);
+                        userInfoMap.set(userName, userInfo);
+                        ws.send(JSON.stringify({
+                            type: `${pkg.type}`,
+                            message: userInfo,
+                        }));
+                        console.log(`userInfo: ${userInfo}`);
+                    }
+                }
+                break;
             /** 處理 Slot Spin 封包 */
             case 'SlotSpin':
                 {
