@@ -5,10 +5,12 @@ const wss = new WebSocket.Server({
 });
 
 let userCounts = 0;
-const userInitCredit = 10000;
+let userCredit = 10000;
 const userNameList = [];
 const userInfoList = [];
 const userInfoMap = new Map();
+const symbolOddsList = [0.1, 0.2, 0.3, 0.4, 0.5];
+
 
 /** 接收 Client 連線 */
 wss.on('connection', (ws) => {
@@ -30,11 +32,10 @@ wss.on('connection', (ws) => {
                 {
                     const userName = pkg.message.userName;
                     if (userNameList.includes(userName)) {
-                        // TODO
                         const userInfo = userInfoMap.get(userName);
                         ws.send(JSON.stringify({
                             type: `${pkg.type}`,
-                            message: userInfo,
+                            message: { userInfo },
                         }));
                         console.log(`exist userInfo :${JSON.stringify(userInfo)}`);
                     }
@@ -43,21 +44,21 @@ wss.on('connection', (ws) => {
                         const userInfo = {
                             userID: userCounts,
                             userName,
-                            credit: userInitCredit,
+                            userCredit,
                         };
                         userNameList.push(userName);
                         userInfoList.push(userInfo);
                         userInfoMap.set(userName, userInfo);
                         ws.send(JSON.stringify({
                             type: `${pkg.type}`,
-                            message: userInfo,
+                            message: { userInfo },
                         }));
                         console.log(`new userInfo :${JSON.stringify(userInfo)}`);
                     }
                 }
                 break;
-            /** 處理 SymbolResult 封包 */
-            case 'SymbolResult':
+            /** 處理 GameInit 封包 */
+            case 'GameInit':
                 {
                     /** Symbol 數量 */
                     const symbolCounts = pkg.message.symbolCounts;
@@ -71,7 +72,35 @@ wss.on('connection', (ws) => {
                     console.log(`symbolsResult: ${symbolsResult}`);
                     ws.send(JSON.stringify({
                         type: `${pkg.type}`,
-                        message: { symbols: symbolsResult },
+                        message: {
+                            odds: symbolOddsList,
+                            symbols: symbolsResult,
+                        },
+                    }));
+                }
+                break;
+            /** 處理 SlotSpin 封包 */
+            case 'SlotSpin':
+                {
+                    /** total bet */
+                    const totalBet = pkg.message.totalBet;
+                    /** Symbol 數量 */
+                    const symbolCounts = pkg.message.symbolCounts;
+                    /** Symbol Index */
+                    const symbolIndexCounts = pkg.message.symbolIndexCounts;
+                    /** Symbol 陣列 (亂數) */
+                    const symbolsResult = [];
+                    for (let i = 0; i < symbolCounts; i += 1) {
+                        symbolsResult.push(getRandomSymbolIndex(symbolIndexCounts));
+                    }
+                    userCredit -= totalBet;
+                    console.log(`symbolsResult: ${symbolsResult}`);
+                    ws.send(JSON.stringify({
+                        type: `${pkg.type}`,
+                        message: {
+                            symbols: symbolsResult,
+                            userCredit,
+                        },
                     }));
                 }
                 break;
