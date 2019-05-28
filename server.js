@@ -36,7 +36,7 @@ wss.on('connection', (ws) => {
                             type: `${pkg.type}`,
                             message: userInfo,
                         }));
-                        console.log(`userInfo: ${userInfo}`);
+                        console.log(`exist userInfo :${JSON.stringify(userInfo)}`);
                     }
                     else {
                         ++userCounts;
@@ -52,12 +52,12 @@ wss.on('connection', (ws) => {
                             type: `${pkg.type}`,
                             message: userInfo,
                         }));
-                        console.log(`userInfo: ${userInfo}`);
+                        console.log(`new userInfo :${JSON.stringify(userInfo)}`);
                     }
                 }
                 break;
-            /** 處理 Slot Spin 封包 */
-            case 'SlotSpin':
+            /** 處理 SymbolResult 封包 */
+            case 'SymbolResult':
                 {
                     /** Symbol 數量 */
                     const symbolCounts = pkg.message.symbolCounts;
