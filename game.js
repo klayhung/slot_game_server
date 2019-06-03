@@ -17,35 +17,6 @@ module.exports = function Game() {
         console.log(`game ${this.gameID} receive : ${data}`);
         const pkg = JSON.parse(data);
         switch (pkg.type) {
-            case 'Login':
-                {
-                    const userName = pkg.message.userName;
-                    if (gm.userNameList.includes(userName)) {
-                        const userInfo = gm.userInfoMap.get(userName);
-                        this.ws.send(JSON.stringify({
-                            type: `${pkg.type}`,
-                            message: { userInfo },
-                        }));
-                        console.log(`exist userInfo :${JSON.stringify(userInfo)}`);
-                    }
-                    else {
-                        ++gm.userCounts;
-                        const userInfo = {
-                            userID: gm.userCounts,
-                            userName,
-                            userCredit: this.credit,
-                        };
-                        gm.userNameList.push(userName);
-                        gm.userInfoList.push(userInfo);
-                        gm.userInfoMap.set(userName, userInfo);
-                        this.ws.send(JSON.stringify({
-                            type: `${pkg.type}`,
-                            message: { userInfo },
-                        }));
-                        console.log(`new userInfo :${JSON.stringify(userInfo)}`);
-                    }
-                }
-                break;
             case 'GameInit':
                 {
                     /** Symbol 數量 */

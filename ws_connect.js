@@ -7,6 +7,7 @@ const wss = new WebSocket.Server({
 
 const connections = {};
 let connectionIDCounter = 0;
+gm.init();
 
 /** 接收 Client 連線 */
 wss.on('connection', (ws) => {
