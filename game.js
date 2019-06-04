@@ -1,6 +1,5 @@
 
 module.exports = function Game() {
-    this.gameID = 0;
     this.users = {};
     this.ws = {};
     this.totalBet = 0;
@@ -8,13 +7,12 @@ module.exports = function Game() {
     this.symbolOddsList = [0.1, 0.2, 0.3, 0.4, 0.5];
 
     this.init = function init(ws, gm) {
-        this.gameID = ++gm.gameIDCounter;
         this.ws = ws;
         this.credit = gm.userCredit;
     };
 
-    this.dealC2S = function dealC2S(data, gm) {
-        console.log(`game ${this.gameID} receive : ${data}`);
+    this.dealC2S = function dealC2S(data) {
+        console.log(`game receive : ${data}`);
         const pkg = JSON.parse(data);
         switch (pkg.type) {
             case 'GameInit':

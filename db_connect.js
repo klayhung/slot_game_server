@@ -4,8 +4,8 @@ module.exports = {
     connection: mysql.createConnection({
         host: 'localhost',
         user: 'root',
-        password: 'qazedctgb5213',
-        database: 'slot_game',
+        password: 'e156156',
+        database: 'SlotGame',
     }),
 
     connect() {

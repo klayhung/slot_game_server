@@ -1,9 +1,8 @@
 const Game = require('./game');
-const db_connection = require('./db_connect');
+const dbConnection = require('./db_connect');
 
 module.exports = {
-    gameList: [],
-    gameIDCounter: 0,
+    gameMap: new Map(),
 
     userCounts: 0,
     userPoint: 10000,
@@ -12,61 +11,67 @@ module.exports = {
     userInfoMap: new Map(),
 
     init() {
-        db_connection.connect();
+        dbConnection.connect();
     },
 
     createGame(ws) {
-        const g = new Game();
-        g.init(ws, this);
-        this.gameList.push(g);
+        const game = new Game();
+        game.init(ws, this);
+        this.gameMap.set(ws.id, game);
     },
 
     receiveClientPackage(wsID, data) {
-        this.gameList.forEach((eachGame) => {
-            if (eachGame.ws.id === wsID) {
-                const pkg = JSON.parse(data);
-                switch (pkg.type) {
-                    case 'Login':
-                        {
-                            const userName = pkg.message.userName;
-                            let userInfo = {};
-                            db_connection.query(`select * from user where user_name = "${userName}"`, (results, fields) => {
-                                if (results.length === 1) {
-                                    const js = JSON.stringify(results[0]);
-                                    userInfo = JSON.parse(js);
+        const game = this.gameMap.get(wsID);
+        if (game !== undefined) {
+            const pkg = JSON.parse(data);
+            switch (pkg.type) {
+                case 'Login':
+                    {
+                        const userName = pkg.message.userName;
+                        let userInfo = {};
+                        dbConnection.query(`select * from User where userName = "${userName}"`, (results) => {
+                            if (results.length === 1) {
+                                userInfo = JSON.parse(JSON.stringify(results[0]));
+                                this.userInfoMap.set(userName, userInfo);
+                                game.ws.send(JSON.stringify({
+                                    type: `${pkg.type}`,
+                                    message: { userInfo },
+                                }));
+                            }
+                            else if (results.length === 0) {
+                                userInfo = {
+                                    userID: -1,
+                                    userName,
+                                    userPoint: this.userPoint,
+                                };
+                                const addUserToSql = `insert into User (userName, userPoint) values ('${userName}', ${this.userPoint})`;
+                                dbConnection.query(addUserToSql, (insertResults) => {
+                                    const insertObj = JSON.parse(JSON.stringify(insertResults));
+                                    console.log(JSON.stringify(insertResults));
+                                    console.log(insertObj.insertId);
+                                    userInfo.userID = insertObj.insertId;
                                     this.userInfoMap.set(userName, userInfo);
-                                    eachGame.ws.send(JSON.stringify({
+                                    game.ws.send(JSON.stringify({
                                         type: `${pkg.type}`,
                                         message: { userInfo },
                                     }));
-                                }
-                                else if (results.length === 0) {
-                                    userInfo = {
-                                        user_id: -1,
-                                        user_name: userName,
-                                        user_point: this.userPoint,
-                                    };
-                                    const addUserToSql = `insert into user (user_name, user_point) values ('${userName}', ${this.userPoint})`;
-                                    db_connection.query(addUserToSql, (insertResults, insertFields) => {
-                                        const insertObj = JSON.parse(JSON.stringify(insertResults));
-                                        console.log(JSON.stringify(insertResults));
-                                        console.log(insertObj.insertId);
-                                        userInfo.user_id = insertObj.insertId;
-                                        this.userInfoMap.set(userName, userInfo);
-                                        eachGame.ws.send(JSON.stringify({
-                                            type: `${pkg.type}`,
-                                            message: { userInfo },
-                                        }));
-                                    });
-                                }
-                            });
-                        }
-                        break;
-                    default:
-                        eachGame.dealC2S(data, this);
-                        break;
-                }
+                                });
+                            }
+                        });
+                    }
+                    break;
+                case 'Logout':
+                    {
+                        const userInfo = pkg.message;
+                        const updateUserToSql = `UPDATE User SET userPoint = ${userInfo.userPoint} WHERE userID = ${userInfo.userID}`;
+                        console.log(`updateUserToSql: ${updateUserToSql}`);
+                        dbConnection.query(updateUserToSql);
+                    }
+                    break;
+                default:
+                    game.dealC2S(data, this);
+                    break;
             }
-        });
+        }
     },
 };
