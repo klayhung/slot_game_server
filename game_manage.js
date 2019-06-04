@@ -57,7 +57,6 @@ module.exports = {
                                     }));
                                 });
                             }
-                            game.start();
                         });
                     }
                     break;
@@ -66,7 +65,7 @@ module.exports = {
                         const userInfo = pkg.message;
                         const updateUserToSql = `UPDATE User SET userPoint = ${userInfo.userPoint} WHERE userID = ${userInfo.userID}`;
                         console.log(`updateUserToSql: ${updateUserToSql}`);
-                        dbConnection.query(updateUserToSql);
+                        dbConnection.query(updateUserToSql, () => {});
                     }
                     break;
                 default:

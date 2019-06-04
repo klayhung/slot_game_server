@@ -19,40 +19,31 @@ module.exports = function FSM() {
         ],
 
         methods: {
-            onReady(lifecycle, game) {
+            onReady(lifecycle, game, pkg) {
                 console.log(`current state : ${lifecycle.to}`);
-                const symbolCounts = game.symbolRow * game.symbolColumn;
-                const symbolIndexCounts = game.symbolName.SN_COUNT;
-                const symbolsResult = [];
-                for (let i = 0; i < symbolCounts; i += 1) {
-                    const rand = Math.floor(Math.random() * Math.floor(symbolIndexCounts));
-                    symbolsResult.push(rand);
-                }
                 const S2C_Init = {
-                    type: 'GameInit',
+                    type: pkg.type,
                     message: {
                         odds: game.symbolOddsList,
-                        symbols: symbolsResult,
+                        symbols: game.getNextSymbolResult(),
                     },
                 };
-                console.log(`symbolsResult: ${symbolsResult}`);
                 game.sendS2C(S2C_Init);
             },
 
-            onSpin() {
-                console.log(`current state : ${this.stateMachine.state}`);
-            },
-
-            onSpinWin() {
-                console.log(`current state : ${this.stateMachine.state}`);
-            },
-
-            onEndAnimen() {
-                console.log(`current state : ${this.stateMachine.state}`);
-            },
-
-            onSpinNoWin() {
-                console.log(`current state : ${this.stateMachine.state}`);
+            onSpin(lifecycle, game, pkg) {
+                console.log(`current state : ${lifecycle.to}`);
+                game.totalBet = pkg.message.totalBet;
+                game.credit -= game.totalBet;
+                const symbolResult = game.getNextSymbolResult();
+                const S2C_Spin = {
+                    type: pkg.type,
+                    message: {
+                        credit: game.credit,
+                        symbols: symbolResult,
+                    },
+                };
+                game.sendS2C(S2C_Spin);
             },
         },
     });
