@@ -1,8 +1,12 @@
 const FSM = require('./state_machine');
+const WinLose = require('./winlose');
 
 module.exports = function Game() {
-    this.users = {};
+    this.user = {};
     this.ws = {};
+    this.fsm = {};
+    this.winlose = {};
+
     this.totalBet = 0;
     this.credit = 0;
     this.symbolName = {
@@ -16,12 +20,20 @@ module.exports = function Game() {
     this.symbolOddsList = [0.1, 0.2, 0.3, 0.4, 0.5];
     this.symbolRow = 3;
     this.symbolColumn = 3;
-    this.fsm = {};
 
-    this.init = function init(ws, gm) {
+    this.init = function init(ws) {
         this.ws = ws;
-        this.credit = gm.userCredit;
         this.fsm = new FSM().stateMachine;
+        this.winlose = new WinLose();
+    };
+
+    this.setUserInfo = function setUserInfo(user) {
+        this.user = user;
+        this.credit = user.userPoint;
+    };
+
+    this.updateUserPoint = function updateUserPoint() {
+        this.user.userPoint = this.credit;
     };
 
     this.dealC2S = function dealC2S(data) {
@@ -33,14 +45,6 @@ module.exports = function Game() {
                 break;
             case 'SlotSpin':
                 this.fsm.spin(this, pkg);
-                break;
-            case 'SaveDB':
-                /** total bet */
-                this.totalBet = pkg.message.totalBet;
-                /** Credit */
-                this.credit = pkg.message.credit;
-
-                // TODO
                 break;
             default:
                 break;
@@ -65,73 +69,5 @@ module.exports = function Game() {
         }
         console.log(`symbolsResult: ${symbolsResult}`);
         return symbolsResult;
-    };
-
-    this.resetSymbolWinLoseList = function resetSymbolWinLoseList() {
-        this.symbolWinLoseList = this.symbolIndexList.map((value, index) => ({
-            index: value,
-            isWin: false,
-            positions: [],
-            winScore: 0,
-        }));
-    };
-
-    this.getSymbolPosOfRowList = function getSymbolPosOfRowList(symbolResult, symbolRow) {
-        const fisrtRowSymbolPosList = [];
-        const symbolPosOfRowList = [];
-
-        /** 取得第一行位置 */
-        symbolResult.forEach((value, index) => {
-            if (index === 0 || index % symbolRow === 0) {
-                fisrtRowSymbolPosList.push(index);
-            }
-        });
-
-        /** 取得以行排序的位置 */
-        for (let j = 0; j < symbolRow; j += 1) {
-            symbolPosOfRowList.push(fisrtRowSymbolPosList.map(val => val + j));
-        }
-
-        return symbolPosOfRowList;
-    };
-
-    this.setWinLose = function setWinLose(totalBet, symbolResult, symbolRow) {
-        this.resetSymbolWinLoseList();
-        const symbolPosOfRowList = this.getSymbolPosOfRowList(symbolResult, symbolRow);
-        const winSymbolIndexList = this.symbolIndexList.filter((value) => {
-            let rowCounts = 0;
-            symbolPosOfRowList.forEach((positions) => {
-                const result = positions.find(pos => symbolResult[pos] === value);
-                if (result !== undefined) ++rowCounts;
-            });
-            return rowCounts === symbolRow;
-        });
-        console.log(`winSymbolIndexList:${winSymbolIndexList}`);
-
-        this.symbolWinLoseList.forEach((symbol) => {
-            if (winSymbolIndexList.includes(symbol.index)) {
-                symbol.isWin = true;
-                symbolResult.forEach((value, pos) => {
-                    if (value === symbol.index) {
-                        symbol.positions.push(pos);
-                    }
-                });
-
-                const symbolCountOfRowList = [];
-                symbolPosOfRowList.forEach((positions) => {
-                    let countsOfRow = 0;
-                    positions.forEach((pos) => {
-                        if (symbol.positions.includes(pos)) {
-                            ++countsOfRow;
-                        }
-                    });
-                    symbolCountOfRowList.push(countsOfRow);
-                });
-
-                const symbolCounts = symbolCountOfRowList.reduce((first, second) => first * second);
-                symbol.winScore = totalBet * symbolCounts * this.symbolOddsList[symbol.index];
-            }
-        });
-        console.log(`winSymbolIndexList:${JSON.stringify(this.symbolWinLoseList)}`);
     };
 };

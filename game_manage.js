@@ -16,7 +16,7 @@ module.exports = {
 
     createGame(ws) {
         const game = new Game();
-        game.init(ws, this);
+        game.init(ws);
         this.gameMap.set(ws.id, game);
     },
 
@@ -33,6 +33,7 @@ module.exports = {
                             if (results.length === 1) {
                                 userInfo = JSON.parse(JSON.stringify(results[0]));
                                 this.userInfoMap.set(userName, userInfo);
+                                game.setUserInfo(userInfo);
                                 game.ws.send(JSON.stringify({
                                     type: `${pkg.type}`,
                                     message: { userInfo },
@@ -51,6 +52,7 @@ module.exports = {
                                     console.log(insertObj.insertId);
                                     userInfo.userID = insertObj.insertId;
                                     this.userInfoMap.set(userName, userInfo);
+                                    game.setUserInfo(userInfo);
                                     game.ws.send(JSON.stringify({
                                         type: `${pkg.type}`,
                                         message: { userInfo },
@@ -63,9 +65,11 @@ module.exports = {
                 case 'Logout':
                     {
                         const userInfo = pkg.message;
-                        const updateUserToSql = `UPDATE User SET userPoint = ${userInfo.userPoint} WHERE userID = ${userInfo.userID}`;
-                        console.log(`updateUserToSql: ${updateUserToSql}`);
-                        dbConnection.query(updateUserToSql, () => {});
+                        if (userInfo.userID === game.user.userID) {
+                            const updateUserToSql = `UPDATE User SET userPoint = ${game.user.userPoint} WHERE userID = ${userInfo.userID}`;
+                            console.log(`updateUserToSql: ${updateUserToSql}`);
+                            dbConnection.query(updateUserToSql, () => {});
+                        }
                     }
                     break;
                 default:

@@ -22,13 +22,13 @@ wss.on('connection', (ws) => {
     });
 
     /** 接收 Client 錯誤訊息 */
-    ws.on('error', (err) => {
+    ws.on('error', () => {
     });
 
     /** 接收 Client 訊息 */
     ws.on('message', (data) => {
-        gm.receiveClientPackage(ws.id, data);
         console.log(`ws id: ${ws.id}`);
         console.log(`server rcv data: ${data}`);
+        gm.receiveClientPackage(ws.id, data);
     });
 });
