@@ -35,7 +35,7 @@ module.exports = function WinLose() {
         }));
     };
 
-    this.getSymbolPosOfRowList = function getSymbolPosOfRowListfunction(symbolResult, symbolRow) {
+    this.getSymbolPosOfRowList = function getSymbolPosOfRowList(symbolResult, symbolRow) {
         const fisrtRowSymbolPosList = [];
         const symbolPosOfRowList = [];
 
@@ -104,7 +104,7 @@ module.exports = function WinLose() {
         return totalWin;
     };
 
-    this.getWinPositions = function getWinPositions(symbolRow) {
+    this.getWinPositions = function getWinPositions(symbolRow = 0) {
         let winPositions = [];
         this.symbolWinLoseList.forEach((symbol) => {
             if (symbol.isWin) {
