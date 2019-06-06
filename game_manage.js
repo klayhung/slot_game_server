@@ -10,16 +10,28 @@ module.exports = {
     userInfoList: [],
     userInfoMap: new Map(),
 
+    /**
+     * GameManage 初始
+     */
     init() {
         dbConnection.connect();
     },
 
+    /**
+     * 創建 Game
+     * @param {Object} ws 單一 websocket 連線物件
+     */
     createGame(ws) {
         const game = new Game();
         game.init(ws);
         this.gameMap.set(ws.id, game);
     },
 
+    /**
+     * 接收 Client 訊息
+     * @param {Integer} wsID
+     * @param {JSON} data
+     */
     receiveClientPackage(wsID, data) {
         const game = this.gameMap.get(wsID);
         if (game !== undefined) {

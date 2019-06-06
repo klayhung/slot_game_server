@@ -8,10 +8,18 @@ module.exports = {
         database: 'SlotGame',
     }),
 
+    /**
+     * 連線 db
+     */
     connect() {
         this.connection.connect();
     },
 
+    /**
+     * 通知 db 指令 (ex.查詢、新增..)
+     * @param {String} sqlCmd Sql Command
+     * @param {Function} sqlCB Sql CallBack
+     */
     query(sqlCmd, sqlCB) {
         this.connection.query(sqlCmd, (error, results, fields) => {
             if (error) throw error;

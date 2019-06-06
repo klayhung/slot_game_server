@@ -4,6 +4,10 @@ module.exports = function WinLose() {
     this.symbolWinLoseList = [];
     this.symbolOddsList = [];
 
+    /**
+     * 設定每個 Symbol Index 資訊
+     * @param {Integer} indexCounts symbol index 數量
+     */
     this.setSymbolIndexList = function setSymbolIndexList(indexCounts) {
         for (let i = 0; i < indexCounts; i += 1) {
             this.symbolIndexList.push(i);
@@ -17,15 +21,27 @@ module.exports = function WinLose() {
         }));
     };
 
+    /**
+     * 設定賠率表資訊
+     * @param {Array} odds 賠率表
+     */
     this.setSymbolOddsList = function setSymbolOddsList(odds) {
         this.symbolOddsList = odds;
     };
 
+    /**
+     * 初始 WinLose 設定
+     * @param {Integer} indexCounts symbol index 數量
+     * @param {Array} odds 賠率表
+     */
     this.initWinLose = function initWinLose(indexCounts, odds) {
         this.setSymbolIndexList(indexCounts);
         this.setSymbolOddsList(odds);
     };
 
+    /**
+     * Reset WinLose 設定
+     */
     this.resetSymbolWinLoseList = function resetSymbolWinLoseList() {
         this.symbolWinLoseList = this.symbolIndexList.map(value => ({
             index: value,
@@ -35,6 +51,11 @@ module.exports = function WinLose() {
         }));
     };
 
+    /**
+     * 取得以行為序的陣列
+     * @param {Array} symbolResult 盤面
+     * @param {Integer} symbolRow 行數
+     */
     this.getSymbolPosOfRowList = function getSymbolPosOfRowList(symbolResult, symbolRow) {
         const fisrtRowSymbolPosList = [];
         const symbolPosOfRowList = [];
@@ -54,6 +75,12 @@ module.exports = function WinLose() {
         return symbolPosOfRowList;
     };
 
+    /**
+     * 設定此次盤面的輸贏資訊
+     * @param {Integer} totalBet 押注
+     * @param {Array} symbolResult 盤面
+     * @param {Integer} symbolRow 行數
+     */
     this.setWinLose = function setWinLose(totalBet, symbolResult, symbolRow) {
         this.resetSymbolWinLoseList();
         const symbolPosOfRowList = this.getSymbolPosOfRowList(symbolResult, symbolRow);
@@ -65,7 +92,7 @@ module.exports = function WinLose() {
             });
             return rowCounts === symbolRow;
         });
-        console.log(`winSymbolIndexList:${winSymbolIndexList}`);
+        // console.log(`winSymbolIndexList:${winSymbolIndexList}`);
 
         this.symbolWinLoseList.forEach((symbol) => {
             if (winSymbolIndexList.includes(symbol.index)) {
@@ -91,9 +118,12 @@ module.exports = function WinLose() {
                 symbol.winScore = totalBet * symbolCounts * this.symbolOddsList[symbol.index];
             }
         });
-        console.log(`winSymbolIndexList:${JSON.stringify(this.symbolWinLoseList)}`);
+        // console.log(`winSymbolIndexList:${JSON.stringify(this.symbolWinLoseList)}`);
     };
 
+    /**
+     * 取得盤面的總贏分
+     */
     this.getTotalWin = function getTotalWin() {
         let totalWin = 0;
         this.symbolWinLoseList.forEach((symbol) => {
@@ -104,6 +134,10 @@ module.exports = function WinLose() {
         return totalWin;
     };
 
+    /**
+     * 取得盤面有中的 Symbol 位置
+     * @param {Integer} symbolRow 行數 (預設 0)
+     */
     this.getWinPositions = function getWinPositions(symbolRow = 0) {
         let winPositions = [];
         this.symbolWinLoseList.forEach((symbol) => {

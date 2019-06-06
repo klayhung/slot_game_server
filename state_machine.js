@@ -12,6 +12,12 @@ module.exports = function FSM() {
         ],
 
         methods: {
+            /**
+             * Game Ready transition
+             * @param {Object} lifecycle
+             * @param {Object} game
+             * @param {Object} pkg
+             */
             onReady(lifecycle, game, pkg) {
                 console.log(`current state : ${lifecycle.to}`);
 
@@ -27,6 +33,12 @@ module.exports = function FSM() {
                 game.sendS2C(S2C_Init);
             },
 
+            /**
+             * 玩家 Spin transition
+             * @param {Object} lifecycle
+             * @param {Object} game
+             * @param {Object} pkg
+             */
             onSpin(lifecycle, game, pkg) {
                 console.log(`current state : ${lifecycle.to}`);
                 game.totalBet = pkg.message.totalBet;
@@ -53,6 +65,12 @@ module.exports = function FSM() {
                 }, 0);
             },
 
+            /**
+             * 玩家 Spin 有贏分 transition
+             * @param {Object} lifecycle
+             * @param {Object} game
+             * @param {Object} pkg
+             */
             onSpinWin(lifecycle, game, pkg) {
                 console.log(`current state : ${lifecycle.to}`);
 
@@ -64,11 +82,23 @@ module.exports = function FSM() {
                 }, 0);
             },
 
+            /**
+             * 玩家 Spin 沒有贏分 transition
+             * @param {Object} lifecycle
+             * @param {Object} game
+             * @param {Object} pkg
+             */
             onSpinNoWin(lifecycle, game, pkg) {
                 console.log(`current state : ${lifecycle.to}`);
                 game.updateUserPoint();
             },
 
+            /**
+             * 贏分 transition
+             * @param {Object} lifecycle
+             * @param {Object} game
+             * @param {Object} pkg
+             */
             onEndAnime(lifecycle, game, pkg) {
                 console.log(`current state : ${lifecycle.to}`);
             },

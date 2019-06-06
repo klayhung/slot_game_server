@@ -2,10 +2,10 @@
   "name": "slot_roller_server",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "ws_connect.js",
   "scripts": {
     "test": "jest",
-    "start": "node server.js"
+    "start": "node ws_connect.js"
   },
   "author": "",
   "license": "ISC",
