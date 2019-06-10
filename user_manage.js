@@ -9,7 +9,7 @@ module.exports = {
     },
 
     getUser(userName) {
-        return this.gamesMap.get(userName);
+        return this.usersMap.get(userName);
     },
 
     receiveClientPackage(wsID, data) {

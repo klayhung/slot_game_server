@@ -82,7 +82,7 @@ test('check_3x5_symbolPosOfRow', () => {
         .toEqual(expectSymbolPosOfRowList);
 });
 
-test('check_noWin_and_totalWin_is_0_and_pos_is_empty', () => {
+describe('check_noWin', () => {
     const winlose = new WinLose();
     const symbolOddsList = [1, 2, 3, 4, 5];
     const totalBet = 100;
@@ -94,6 +94,7 @@ test('check_noWin_and_totalWin_is_0_and_pos_is_empty', () => {
     const symbolRow = 3;
     const count = 5;
     const expectSymbolWinLoseList = [];
+
     for (let i = 0; i < count; i += 1) {
         expectSymbolWinLoseList.push({
             index: i,
@@ -102,14 +103,24 @@ test('check_noWin_and_totalWin_is_0_and_pos_is_empty', () => {
             winScore: 0,
         });
     }
+
     winlose.initWinLose(count, symbolOddsList);
     winlose.setWinLose(totalBet, symbolResult, symbolRow);
-    expect(winlose.symbolWinLoseList).toEqual(expectSymbolWinLoseList);
-    expect(winlose.getTotalWin()).toBe(0);
-    expect(winlose.getWinPositions()).toEqual([]);
+
+    test('symbolWinLoseList', () => {
+        expect(winlose.symbolWinLoseList).toEqual(expectSymbolWinLoseList);
+    });
+
+    test('totalWin_is_0', () => {
+        expect(winlose.getTotalWin()).toBe(0);
+    });
+
+    test('pos_is_empty', () => {
+        expect(winlose.getWinPositions()).toEqual([]);
+    });
 });
 
-test('check_symbol_0_win_1_count_and_totalWin_is_0_and_pos_is_[4, 6, 8]', () => {
+describe('check_symbol_0_win_1_count', () => {
     const winlose = new WinLose();
     const symbolOddsList = [1, 2, 3, 4, 5];
     const totalBet = 100;
@@ -121,6 +132,7 @@ test('check_symbol_0_win_1_count_and_totalWin_is_0_and_pos_is_[4, 6, 8]', () => 
     const symbolRow = 3;
     const count = 5;
     const expectSymbolWinLoseList = [];
+
     expectSymbolWinLoseList.push({
         index: 0,
         isWin: true,
@@ -135,14 +147,24 @@ test('check_symbol_0_win_1_count_and_totalWin_is_0_and_pos_is_[4, 6, 8]', () => 
             winScore: 0,
         });
     }
+
     winlose.initWinLose(count, symbolOddsList);
     winlose.setWinLose(totalBet, symbolResult, symbolRow);
-    expect(winlose.symbolWinLoseList).toEqual(expectSymbolWinLoseList);
-    expect(winlose.getTotalWin()).toBe(100);
-    expect(winlose.getWinPositions()).toEqual([4, 6, 8]);
+
+    test('symbolWinLoseList', () => {
+        expect(winlose.symbolWinLoseList).toEqual(expectSymbolWinLoseList);
+    });
+
+    test('totalWin_is_100', () => {
+        expect(winlose.getTotalWin()).toBe(100);
+    });
+
+    test('pos_is_[4, 6, 8]', () => {
+        expect(winlose.getWinPositions()).toEqual([4, 6, 8]);
+    });
 });
 
-test('check_symbol_0_win_4_count_and_totalWin_is_0_and_pos_is_[4, 6, 8]', () => {
+describe('check_symbol_0_win_4_count', () => {
     const winlose = new WinLose();
     const symbolOddsList = [1, 2, 3, 4, 5];
     const totalBet = 100;
@@ -154,6 +176,7 @@ test('check_symbol_0_win_4_count_and_totalWin_is_0_and_pos_is_[4, 6, 8]', () => 
     const symbolRow = 3;
     const count = 5;
     const expectSymbolWinLoseList = [];
+
     expectSymbolWinLoseList.push({
         index: 0,
         isWin: true,
@@ -168,14 +191,24 @@ test('check_symbol_0_win_4_count_and_totalWin_is_0_and_pos_is_[4, 6, 8]', () => 
             winScore: 0,
         });
     }
+
     winlose.initWinLose(count, symbolOddsList);
     winlose.setWinLose(totalBet, symbolResult, symbolRow);
-    expect(winlose.symbolWinLoseList).toEqual(expectSymbolWinLoseList);
-    expect(winlose.getTotalWin()).toBe(400);
-    expect(winlose.getWinPositions()).toEqual([0, 2, 4, 6, 8]);
+
+    test('symbolWinLoseList', () => {
+        expect(winlose.symbolWinLoseList).toEqual(expectSymbolWinLoseList);
+    });
+
+    test('totalWin_is_400', () => {
+        expect(winlose.getTotalWin()).toBe(400);
+    });
+
+    test('pos_is_[0, 2, 4, 6, 8]', () => {
+        expect(winlose.getWinPositions()).toEqual([0, 2, 4, 6, 8]);
+    });
 });
 
-test('check_symbol_0_and_4_each_win_1_count_and_totalWin_is_600_and_pos_is_[4, 6, 8, 3, 5, 7]', () => {
+describe('check_symbol_0_and_4_each_win_1_count', () => {
     const winlose = new WinLose();
     const symbolOddsList = [1, 2, 3, 4, 5];
     const totalBet = 100;
@@ -207,9 +240,19 @@ test('check_symbol_0_and_4_each_win_1_count_and_totalWin_is_600_and_pos_is_[4, 6
         positions: [3, 5, 7],
         winScore: totalBet * symbolOddsList[4] * 1,
     });
+
     winlose.initWinLose(count, symbolOddsList);
     winlose.setWinLose(totalBet, symbolResult, symbolRow);
-    expect(winlose.symbolWinLoseList).toEqual(expectSymbolWinLoseList);
-    expect(winlose.getTotalWin()).toBe(600);
-    expect(winlose.getWinPositions()).toEqual([4, 6, 8, 3, 5, 7]);
+
+    test('symbolWinLoseList', () => {
+        expect(winlose.symbolWinLoseList).toEqual(expectSymbolWinLoseList);
+    });
+
+    test('totalWin_is_600', () => {
+        expect(winlose.getTotalWin()).toBe(600);
+    });
+
+    test('pos_is_[4, 6, 8, 3, 5, 7]', () => {
+        expect(winlose.getWinPositions()).toEqual([4, 6, 8, 3, 5, 7]);
+    });
 });

@@ -46,7 +46,9 @@ module.exports = {
         // 保留 continue 使用
         'no-continue': 1,
         // 允許提升 functions & classes
-        'no-use-before-define': [2, { "functions": false, "classes": false }]
+        'no-use-before-define': [2, { "functions": false, "classes": false }],
+        // 使用 Windows /r/n
+        'linebreak-style': ["error", "windows"]
     },
     // 告知 lint 有這些 global variable
     'globals': {
