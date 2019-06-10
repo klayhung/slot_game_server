@@ -34,7 +34,7 @@ module.exports = function Game() {
      * 設定玩家資訊
      * @param {Object} user 玩家物件
      */
-    this.setUserInfo = function setUserInfo(user) {
+    this.setUser = function setUser(user) {
         this.user = user;
         this.credit = user.userPoint;
     };
