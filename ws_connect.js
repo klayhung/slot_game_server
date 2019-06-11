@@ -2,7 +2,7 @@ const WebSocket = require('ws');
 const gm = require('./game_manage');
 
 const wss = new WebSocket.Server({
-    port: 8080,
+    port: 8081,
 });
 
 const connections = {};
