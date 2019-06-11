@@ -6,6 +6,7 @@ module.exports = function Game() {
     this.ws = {};
     this.fsm = {};
     this.winlose = {};
+    this.to = 'Game';
 
     this.totalBet = 0;
     this.credit = 0;
@@ -54,6 +55,18 @@ module.exports = function Game() {
         console.log(`game receive : ${data}`);
         const pkg = JSON.parse(data);
         switch (pkg.type) {
+            case 'RegisterPackage':
+                {
+                    const RegisterPackage = {
+                        type: pkg.type,
+                        message: {
+                            serverName: this.to,
+                            pkgNames: ['GameInit', 'SlotSpin'],
+                        },
+                    };
+                    this.sendS2C(RegisterPackage);
+                }
+                break;
             case 'GameInit':
                 this.fsm.ready(this, pkg);
                 break;
