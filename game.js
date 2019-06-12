@@ -83,11 +83,8 @@ module.exports = function Game() {
      * @param {JSON} data 封包資訊
      */
     this.sendS2C = function sendS2C(data) {
-        console.log(JSON.stringify(data));
-        this.ws.send(JSON.stringify({
-            type: data.type,
-            message: data.message,
-        }));
+        console.log(`game send : ${JSON.stringify(data)}`);
+        this.ws.send(JSON.stringify(data));
     };
 
     /**

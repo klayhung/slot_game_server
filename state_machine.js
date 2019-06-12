@@ -25,10 +25,13 @@ module.exports = function FSM() {
 
                 const S2C_Init = {
                     type: pkg.type,
+                    from: game.to,
+                    to: pkg.from,
                     message: {
                         odds: game.symbolOddsList,
                         symbols: game.getNextSymbolResult(),
                     },
+                    clientID: pkg.clientID,
                 };
                 game.sendS2C(S2C_Init);
             },
@@ -50,11 +53,14 @@ module.exports = function FSM() {
                 const totalWin = game.winlose.getTotalWin();
                 const S2C_Spin = {
                     type: pkg.type,
+                    from: game.to,
+                    to: pkg.from,
                     message: {
                         credit: game.credit,
                         symbols: symbolResult,
                         totalWin,
                     },
+                    clientID: pkg.clientID,
                 };
                 game.sendS2C(S2C_Spin);
 
