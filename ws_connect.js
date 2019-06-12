@@ -29,6 +29,6 @@ wss.on('connection', (ws) => {
     ws.on('message', (data) => {
         console.log(`ws id: ${ws.id}`);
         console.log(`server rcv data: ${data}`);
-        gm.receivePackage(ws.id, data);
+        gm.receivePackage(data);
     });
 });

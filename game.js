@@ -51,9 +51,7 @@ module.exports = function Game() {
      * 處理客端來的遊戲封包
      * @param {JSON} data 封包資訊
      */
-    this.dealC2S = function dealC2S(data) {
-        console.log(`game receive : ${data}`);
-        const pkg = JSON.parse(data);
+    this.dealC2S = function dealC2S(pkg) {
         switch (pkg.type) {
             case 'GameInit':
                 this.fsm.prepare(this, pkg);
@@ -70,9 +68,7 @@ module.exports = function Game() {
      * 處理 Server 端來的遊戲封包
      * @param {JSON} data 封包資訊
      */
-    this.dealS2S = function dealS2S(data) {
-        console.log(`game receive : ${data}`);
-        const pkg = JSON.parse(data);
+    this.dealS2S = function dealS2S(pkg) {
         switch (pkg.type) {
             case 'Login':
                 this.fsm.ready(this, pkg);
@@ -94,6 +90,10 @@ module.exports = function Game() {
         this.gm.sendPackage(data);
     };
 
+    /**
+     * 送出遊戲封包給客端
+     * @param {JSON} data 封包資訊
+     */
     this.sendS2S = function sendS2S(data) {
         this.gm.sendPackage(data);
     };
