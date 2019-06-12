@@ -1,8 +1,8 @@
 const Game = require('./game');
-const dbConnection = require('./db_connect');
 const User = require('./user');
 
 module.exports = {
+    ws: {},
     gamesMap: new Map(),
     usersMap: new Map(),
 
@@ -10,17 +10,28 @@ module.exports = {
      * GameManage 初始
      */
     init() {
-        dbConnection.connect();
+        // dbConnection.connect();
+    },
+
+    receiveConnect(ws) {
+        this.ws = ws;
     },
 
     /**
      * 創建 Game
      * @param {Object} ws 單一 websocket 連線物件
      */
-    createGame(ws) {
+    createGame(clientID) {
         const game = new Game();
-        game.init(ws);
-        this.gamesMap.set(ws.id, game);
+        game.init(this);
+        this.gamesMap.set(clientID, game);
+    },
+
+    destroyGame(clientID) {
+        if (this.gamesMap.has(clientID)) {
+            console.log(`destory game : ${clientID}`);
+            delete this.gamesMap[clientID];
+        }
     },
 
     /**
@@ -28,57 +39,45 @@ module.exports = {
      * @param {Integer} wsID
      * @param {JSON} data
      */
-    receiveClientPackage(wsID, data) {
-        const game = this.gamesMap.get(wsID);
-        if (game !== undefined) {
-            const pkg = JSON.parse(data);
+    receivePackage(wsID, data) {
+        const pkg = JSON.parse(data);
+        if (pkg.from === 'Client') {
             switch (pkg.type) {
-                case 'Login':
-                    {
-                        const userName = pkg.message.userName;
-                        let user = new User();
-                        dbConnection.query(`select * from User where userName = "${userName}"`, (results) => {
-                            if (results.length === 1) {
-                                user = JSON.parse(JSON.stringify(results[0]));
-                                this.usersMap.set(userName, user);
-                                game.setUser(user);
-                                game.ws.send(JSON.stringify({
-                                    type: `${pkg.type}`,
-                                    message: { user },
-                                }));
-                            }
-                            else if (results.length === 0) {
-                                const addUserToSql = `insert into User (userName, userPoint) values ('${userName}', ${user.userPoint})`;
-                                dbConnection.query(addUserToSql, (insertResults) => {
-                                    const insertObj = JSON.parse(JSON.stringify(insertResults));
-                                    console.log(JSON.stringify(insertResults));
-                                    console.log(insertObj.insertId);
-                                    user.userID = insertObj.insertId;
-                                    this.usersMap.set(userName, user);
-                                    game.setUser(user);
-                                    game.ws.send(JSON.stringify({
-                                        type: `${pkg.type}`,
-                                        message: { user },
-                                    }));
-                                });
-                            }
-                        });
+                case 'GameInit':
+                    if (pkg.clientID === undefined) {
+                        return;
                     }
-                    break;
-                case 'Logout':
-                    {
-                        const user = pkg.message;
-                        if (user.userID === game.user.userID) {
-                            const updateUserToSql = `UPDATE User SET userPoint = ${game.user.userPoint} WHERE userID = ${user.userID}`;
-                            console.log(`updateUserToSql: ${updateUserToSql}`);
-                            dbConnection.query(updateUserToSql, () => {});
-                        }
-                    }
+                    this.createGame(pkg.clientID);
+                    this.gamesMap.get(pkg.clientID).dealC2S(data, this);
                     break;
                 default:
-                    game.dealC2S(data, this);
+                    this.gamesMap.get(pkg.clientID).dealC2S(data, this);
                     break;
             }
         }
+        else {
+            switch (pkg.type) {
+                case 'RegisterPackage':
+                    {
+                        const RegisterPackage = {
+                            type: pkg.type,
+                            message: {
+                                serverName: 'Game',
+                                pkgNames: ['GameInit', 'SlotSpin'],
+                            },
+                        };
+                        this.sendPackage(RegisterPackage);
+                    }
+                    break;
+                default:
+                    this.gamesMap.get(pkg.clientID).dealS2S(data, this);
+                    break;
+            }
+        }
+    },
+
+    sendPackage(data) {
+        console.log(`server send : ${JSON.stringify(data)}`);
+        this.ws.send(JSON.stringify(data));
     },
 };

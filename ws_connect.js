@@ -13,7 +13,7 @@ gm.init();
 wss.on('connection', (ws) => {
     ws.id = ++connectionIDCounter;
     connections[ws.id] = ws;
-    gm.createGame(ws);
+    gm.receiveConnect(ws);
 
     /** 接收 Client 關閉連線訊息 */
     ws.on('close', () => {
@@ -29,6 +29,6 @@ wss.on('connection', (ws) => {
     ws.on('message', (data) => {
         console.log(`ws id: ${ws.id}`);
         console.log(`server rcv data: ${data}`);
-        gm.receiveClientPackage(ws.id, data);
+        gm.receivePackage(ws.id, data);
     });
 });

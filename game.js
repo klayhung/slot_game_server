@@ -2,8 +2,8 @@ const FSM = require('./state_machine');
 const WinLose = require('./winlose');
 
 module.exports = function Game() {
+    this.gm = {};
     this.user = {};
-    this.ws = {};
     this.fsm = {};
     this.winlose = {};
     this.to = 'Game';
@@ -25,8 +25,8 @@ module.exports = function Game() {
     /**
      * Game 初始
      */
-    this.init = function init(ws) {
-        this.ws = ws;
+    this.init = function init(gm) {
+        this.gm = gm;
         this.fsm = new FSM().stateMachine;
         this.winlose = new WinLose();
     };
@@ -55,23 +55,31 @@ module.exports = function Game() {
         console.log(`game receive : ${data}`);
         const pkg = JSON.parse(data);
         switch (pkg.type) {
-            case 'RegisterPackage':
-                {
-                    const RegisterPackage = {
-                        type: pkg.type,
-                        message: {
-                            serverName: this.to,
-                            pkgNames: ['GameInit', 'SlotSpin'],
-                        },
-                    };
-                    this.sendS2C(RegisterPackage);
-                }
-                break;
             case 'GameInit':
-                this.fsm.ready(this, pkg);
+                this.fsm.prepare(this, pkg);
                 break;
             case 'SlotSpin':
                 this.fsm.spin(this, pkg);
+                break;
+            default:
+                break;
+        }
+    };
+
+    /**
+     * 處理 Server 端來的遊戲封包
+     * @param {JSON} data 封包資訊
+     */
+    this.dealS2S = function dealS2S(data) {
+        console.log(`game receive : ${data}`);
+        const pkg = JSON.parse(data);
+        switch (pkg.type) {
+            case 'Login':
+                this.fsm.ready(this, pkg);
+                break;
+            case 'Logout':
+                this.fsm.leave(this, pkg);
+                this.gm.destroyGame(pkg.clientID);
                 break;
             default:
                 break;
@@ -83,8 +91,11 @@ module.exports = function Game() {
      * @param {JSON} data 封包資訊
      */
     this.sendS2C = function sendS2C(data) {
-        console.log(`game send : ${JSON.stringify(data)}`);
-        this.ws.send(JSON.stringify(data));
+        this.gm.sendPackage(data);
+    };
+
+    this.sendS2S = function sendS2S(data) {
+        this.gm.sendPackage(data);
     };
 
     /**

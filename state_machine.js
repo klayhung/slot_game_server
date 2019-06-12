@@ -2,16 +2,37 @@ const StateMachine = require('javascript-state-machine');
 
 module.exports = function FSM() {
     this.stateMachine = new StateMachine({
-        init: 'GameInit',
+        init: 'GameDefault',
         transitions: [
+            { name: 'prepare', from: 'GameDefault', to: 'GameInit' },
             { name: 'ready', from: 'GameInit', to: 'GameWait' },
             { name: 'spin', from: 'GameWait', to: 'GameSpin' },
             { name: 'spinWin', from: 'GameSpin', to: 'GameWinAnime' },
             { name: 'spinNoWin', from: 'GameSpin', to: 'GameWait' },
             { name: 'endAnime', from: 'GameWinAnime', to: 'GameWait' },
+            { name: 'leave', from: '*', to: 'GameDefault' },
         ],
 
         methods: {
+            /**
+             * Game Prepare transition
+             * @param {Object} lifecycle
+             * @param {Object} game
+             * @param {Object} pkg
+             */
+            onPrepare(lifecycle, game, pkg) {
+                console.log(`current state : ${lifecycle.to}`);
+
+                const Login = {
+                    type: 'Login',
+                    from: game.to,
+                    to: 'User',
+                    message: { userName: pkg.message.userName },
+                    clientID: pkg.clientID,
+                };
+                game.sendS2S(Login);
+            },
+
             /**
              * Game Ready transition
              * @param {Object} lifecycle
@@ -21,12 +42,13 @@ module.exports = function FSM() {
             onReady(lifecycle, game, pkg) {
                 console.log(`current state : ${lifecycle.to}`);
 
+                game.setUser(pkg.message.user);
                 game.winlose.initWinLose(game.symbolName.SN_COUNT, game.symbolOddsList);
 
                 const S2C_Init = {
-                    type: pkg.type,
+                    type: 'GameInit',
                     from: game.to,
-                    to: pkg.from,
+                    to: 'Client',
                     message: {
                         odds: game.symbolOddsList,
                         symbols: game.getNextSymbolResult(),
@@ -107,6 +129,25 @@ module.exports = function FSM() {
              */
             onEndAnime(lifecycle, game, pkg) {
                 console.log(`current state : ${lifecycle.to}`);
+            },
+
+            /**
+             * 離開遊戲 transition
+             * @param {Object} lifecycle
+             * @param {Object} game
+             * @param {Object} pkg
+             */
+            onLeave(lifecycle, game, pkg) {
+                console.log(`current state : ${lifecycle.to}`);
+
+                const LeaveGame = {
+                    type: pkg.type,
+                    from: game.to,
+                    to: 'User',
+                    message: { user: game.user },
+                    clientID: pkg.clientID,
+                };
+                game.sendS2S(LeaveGame);
             },
         },
     });
